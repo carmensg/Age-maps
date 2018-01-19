@@ -4,20 +4,9 @@ require(monmlp)
 require(plyr)
 
 # Loading the perceptron ----------------------------------------------
-
-setwd("/Users/meme/Dropbox/AGEMAPS/Rscripts/NestedSampling-meme")
-
-# sb99grid <- read.table('/home/est/u31716858/agemaps/sb99grid.txt')
-# colnames(sb99grid) <- c("Z","fqh","Age","Mlim","Ha","NeffHa","Fuv","NeffFuv","rho") # Cols: Z f_qh Age Mlim Ha Neff(Ha) FUV Neff(FUV) rho
-
-# ind <- which(sb99grid$rho>1) # Numerical correction for rho
-# sb99grid[ind,]$rho <- 0.99 
-
-#load("/home/est/u31716858/agemaps/perceptron.Rdata") # loading perceptron
 load("perceptron.Rdata") # loading perceptron
 
 # Functions needed to do posterior samples ------------------------------
-
 prior <- function(){
   z <- runif(1,0.001,0.04)
   fqh <- runif(1,0.1,1) 
@@ -52,12 +41,10 @@ loglikelihood <- function(theta, ratio.obs){#,sigma1,sigma2,rho){
   return(log(lik))
 }
 
-
 # Functions needed to do Nested Sampling --------------------------------
 
 NestedSampling <- function(ratio.obs, prior. = prior, loglikelihood. = loglikelihood,
                            dim.par = 3, M = 100, N = 100){
-
   # SET PRIOR OBJECTS
   S <- matrix(NA, N, dim.par) 
   for(j in 1:N){
@@ -174,18 +161,13 @@ log.plus <- function(x,y) {
 
 # Loading dataset -------------------------------------------------------
 
-m74 <- as.matrix(read.table('/home/est/u31716858/agemaps/n1068.list')) #
-#m74 <- as.matrix(read.table('n1068.list')) #
-# 370*370 = 136900
-colnames(m74) <- c("px","py","ratio","Ha","Fuv","age1","age2") 
-index <- which(m74[,4] !=0 & m74[,5] !=0)
-ratio.obs <- as.numeric(10^(m74[index, "ratio"]))
+m83 <- as.matrix(read.table('m83.list')) # 370*370 = 136900 px
+colnames(m83) <- c("px","py","ratio","Ha","Fuv","age1","age2") 
+index <- which(m83[,4] >0 & m83[,5] >0)
+ratio.obs <- as.numeric(10^(m83[index, "ratio"]))
 
 # Doing the analysis ----------------------------------------------------
-
-no_cores <- detectCores(TRUE)
-no_cores
-cl<-makeCluster(no_cores, type = "FORK")
 post.galaxy <- parLapply(cl, ratio.obs, NestedSampling)
-save(post.galaxy, file = "n1068post.Rdata")
-stopCluster(cl)
+save(post.galaxy, file = "m83post.Rdata")
+
+
