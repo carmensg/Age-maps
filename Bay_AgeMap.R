@@ -1,5 +1,4 @@
 # Libraries required
-library(parallel)
 require(monmlp)
 require(plyr)
 
